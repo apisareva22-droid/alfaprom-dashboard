@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>АЛЬФАПРОМ — Рейтинг менеджеров</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --orange: #FF6B00;
+    --orange2: #FF9A00;
+    --pale: #FFF8F3;
+    --border: #FFD4B0;
+    --white: #ffffff;
+    --bg: #F5F1ED;
+    --text: #1A1A1A;
+    --muted: #888;
+    --green: #2E7D32;
+    --red: #C62828;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  header {
+    background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
+    padding: 0 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px; position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 20px rgba(255,107,0,0.35);
+  }
+  .logo { display: flex; align-items: center; gap: 14px; }
+  .logo-mark {
+    width: 42px; height: 42px; background: rgba(255,255,255,0.22);
+    border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: #fff; letter-spacing: 1px;
+  }
+  .logo-text h1 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: #fff; line-height: 1; }
+  .logo-text p { font-size: 10px; color: rgba(255,255,255,0.8); letter-spacing: 1.5px; text-transform: uppercase; }
+  .header-right { display: flex; align-items: center; gap: 14px; }
+  .update-box { text-align: right; }
+  .update-box .time { font-size: 17px; font-weight: 600; color: #fff; }
+  .update-box .lbl { font-size: 9px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px; }
+  .refresh-btn {
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4);
+    color: #fff; padding: 7px 16px; border-radius: 8px; cursor: pointer;
+    font-size: 12px; font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 6px;
+    transition: background 0.2s;
+  }
+  .refresh-btn:hover { background: rgba(255,255,255,0.28); }
+  .refresh-btn svg { width: 13px; height: 13px; }
+  .refresh-btn.loading svg { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .month-bar {
+    background: var(--white); border-bottom: 1px solid var(--border);
+    padding: 0 28px; display: flex; align-items: center; gap: 4px;
+    overflow-x: auto; position: sticky; top: 68px; z-index: 99;
+  }
+  .month-bar::-webkit-scrollbar { height: 3px; }
+  .month-bar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .month-tab {
+    padding: 12px 16px; font-size: 12px; font-weight: 500; white-space: nowrap;
+    cursor: pointer; border-bottom: 3px solid transparent; color: var(--muted);
+    transition: all 0.2s; flex-shrink: 0;
+  }
+  .month-tab:hover { color: var(--orange); }
+  .month-tab.active { color: var(--orange); border-bottom-color: var(--orange); font-weight: 700; }
+
+  main { padding: 20px 28px 32px; max-width: 1420px; margin: 0 auto; }
+
+  .section-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--orange); font-weight: 600; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .top-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 220px 220px; gap: 12px; margin-bottom: 20px; }
+
+  .kpi-card {
+    background: var(--white); border-radius: var(--radius);
+    border: 1px solid var(--border); padding: 14px 18px; position: relative; overflow: hidden;
+  }
+  .kpi-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--orange), var(--orange2));
+  }
+  .kpi-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-bottom: 6px; }
+  .kpi-value { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 1px; line-height: 1; }
+  .kpi-value.orange { color: var(--orange); }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.red { color: var(--red); }
+  .kpi-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+  .spd-card {
+    background: var(--white); border-radius: var(--radius);
+    border: 1px solid var(--border); padding: 12px 16px; text-align: center;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .spd-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-bottom: 4px; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--white); border-radius: var(--radius);
+    border: 1px solid var(--border); padding: 12px 16px; text-align: center;
+  }
+  .stat-card .stat-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-bottom: 4px; }
+  .stat-card .stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--orange); }
+  .stat-card .stat-sub { font-size: 9px; color: var(--muted); }
+
+  .mgr-table-wrap { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: linear-gradient(135deg, #FF6B00, #FF8C00); }
+  thead th { color: #fff; padding: 10px 14px; text-align: left; font-weight: 500; font-size: 11px; letter-spacing: 0.5px; white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid #FFF0E6; transition: background 0.15s; }
+  tbody tr:hover { background: var(--pale); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 10px 14px; vertical-align: middle; }
+  .rank-cell { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--orange); width: 36px; text-align: center; }
+  .name-cell { font-weight: 600; }
+  .money { font-variant-numeric: tabular-nums; }
+  .badge-leader { background: linear-gradient(135deg, #FF6B00, #FFB300); color: #fff; font-size: 9px; padding: 2px 8px; border-radius: 10px; margin-left: 6px; font-weight: 600; }
+
+  .pb-wrap { display: flex; align-items: center; gap: 8px; min-width: 140px; }
+  .pb-track { flex: 1; background: #FFE8D6; border-radius: 20px; height: 8px; overflow: hidden; }
+  .pb-fill { height: 100%; border-radius: 20px; transition: width 0.6s ease; }
+  .pb-fill.high { background: linear-gradient(90deg, #43A047, #66BB6A); }
+  .pb-fill.mid  { background: linear-gradient(90deg, #FF6B00, #FFB300); }
+  .pb-fill.low  { background: linear-gradient(90deg, #C62828, #E53935); }
+  .pb-pct { font-size: 12px; font-weight: 600; min-width: 42px; text-align: right; }
+  .pb-pct.high { color: var(--green); }
+  .pb-pct.mid  { color: var(--orange); }
+  .pb-pct.low  { color: var(--red); }
+
+  .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .chart-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 18px 20px; }
+  .legend { display: flex; gap: 14px; margin-bottom: 10px; font-size: 11px; color: var(--muted); }
+  .legend span { display: flex; align-items: center; gap: 5px; }
+  .legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+  .error-bar { background: #fff3f3; border: 1px solid #ffcdd2; border-radius: 8px; padding: 14px 18px; color: #c62828; font-size: 13px; margin-bottom: 14px; display: none; line-height: 1.5; }
+  .loading-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.85); display: flex; align-items: center; justify-content: center;
+    z-index: 1000; flex-direction: column; gap: 12px;
+  }
+  .loading-overlay.hidden { display: none; }
+  .loading-spinner {
+    width: 48px; height: 48px; border: 4px solid #FFE8D6;
+    border-top-color: var(--orange); border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  .loading-text { font-size: 14px; color: var(--muted); }
+
+  footer { text-align: center; padding: 18px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); margin-top: 24px; }
+
+  @media (max-width: 1200px) {
+    .top-row { grid-template-columns: 1fr 1fr 1fr; }
+    .stats-row { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 768px) {
+    header { padding: 0 14px; height: 56px; }
+    main { padding: 14px; }
+    .top-row { grid-template-columns: 1fr 1fr; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .bottom-row { grid-template-columns: 1fr; }
+    .mgr-table-wrap { overflow-x: auto; }
+    table { min-width: 900px; }
+    .month-bar { padding: 0 14px; }
+    .logo-text h1 { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Загрузка данных из Google Таблицы...</div>
+</div>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">АП</div>
+    <div class="logo-text">
+      <h1>АЛЬФАПРОМ</h1>
+      <p>Рейтинг отдела продаж</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="update-box">
+      <div class="time" id="update-time">—:—</div>
+      <div class="lbl">Обновлено</div>
+    </div>
+    <button class="refresh-btn" id="refreshBtn" onclick="loadData()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+      </svg>
+      Обновить
+    </button>
+  </div>
+</header>
+
+<div class="month-bar" id="month-bar"></div>
+
+<main>
+  <div class="error-bar" id="error-bar"></div>
+
+  <div class="section-label">Показатели отдела</div>
+  <div class="top-row">
+    <div class="kpi-card"><div class="kpi-label">План отдела</div><div class="kpi-value orange" id="k-plan">—</div><div class="kpi-sub">рублей</div></div>
+    <div class="kpi-card"><div class="kpi-label">Факт отдела</div><div class="kpi-value" id="k-fact">—</div><div class="kpi-sub">рублей</div></div>
+    <div class="kpi-card"><div class="kpi-label">Конверсия отдела</div><div class="kpi-value orange" id="k-conv">—</div><div class="kpi-sub">в оплату</div></div>
+    <div class="kpi-card"><div class="kpi-label">Всего продаж</div><div class="kpi-value" id="k-sales">—</div><div class="kpi-sub">сделок закрыто</div></div>
+    <div class="spd-card">
+      <div class="spd-title">% выполнения плана</div>
+      <canvas id="spd-exec" width="160" height="100"></canvas>
+      <div id="spd-exec-val" style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--orange);margin-top:-4px">—</div>
+    </div>
+    <div class="spd-card">
+      <div class="spd-title">Скорость (RunRate)</div>
+      <canvas id="spd-run" width="160" height="100"></canvas>
+      <div id="spd-run-val" style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--orange);margin-top:-4px">—</div>
+    </div>
+  </div>
+
+  <div class="section-label">Активность отдела</div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">Заявки факт</div><div class="stat-val" id="s-zayvki-f">—</div><div class="stat-sub">из <span id="s-zayvki-p">—</span> план</div></div>
+    <div class="stat-card"><div class="stat-label">Звонки факт</div><div class="stat-val" id="s-zvonki-f">—</div><div class="stat-sub">из <span id="s-zvonki-p">—</span> план</div></div>
+    <div class="stat-card"><div class="stat-label">Минуты факт</div><div class="stat-val" id="s-min-f">—</div><div class="stat-sub">из <span id="s-min-p">—</span> план</div></div>
+    <div class="stat-card"><div class="stat-label">Рабочих дней</div><div class="stat-val" id="s-days">—</div><div class="stat-sub">из <span id="s-days-total">—</span> в месяце</div></div>
+    <div class="stat-card"><div class="stat-label">Осталось маржи</div><div class="stat-val" id="s-ost-marzhi">—</div><div class="stat-sub">до плана</div></div>
+    <div class="stat-card"><div class="stat-label">Надо в день</div><div class="stat-val" id="s-nado">—</div><div class="stat-sub">маржи сегодня</div></div>
+  </div>
+
+  <div class="section-label">Рейтинг менеджеров</div>
+  <div class="mgr-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Менеджер</th>
+          <th>План</th>
+          <th>Факт</th>
+          <th>Выполнение плана</th>
+          <th>RunRate</th>
+          <th>Заявок</th>
+          <th>Доход/заявку</th>
+          <th>Конверсия</th>
+          <th>Прогноз дохода</th>
+        </tr>
+      </thead>
+      <tbody id="mgr-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="bottom-row">
+    <div class="chart-card">
+      <div class="section-label">Факт vs План (руб.)</div>
+      <div class="legend">
+        <span><i style="background:#FFD4B0"></i>План</span>
+        <span><i style="background:#FF6B00"></i>Факт</span>
+      </div>
+      <div style="position:relative;height:260px">
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="section-label">% выполнения по менеджерам</div>
+      <div style="position:relative;height:260px">
+        <canvas id="hbarChart"></canvas>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>АЛЬФАПРОМ · Данные обновляются из Google Таблицы в реальном времени · Автообновление каждые 5 минут</footer>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzMxb5eE598Oxtk4IUr0jMt7cFfG5uL1UQuu076BuglFtNQp5X8Mi5-Wd8ldYFqyu3vxQ/exec";
+
+let allData = null;
+let currentMonth = null;
+let chartBar = null;
+let chartHbar = null;
+
+function parseNum(v) {
+  if (v === null || v === undefined || v === '' || typeof v === 'object') return 0;
+  const s = String(v).replace(/\s/g,'').replace(',','.');
+  if (s.startsWith('#') || s === 'NaN' || s === 'nan') return 0;
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+function fmt(n) {
+  const v = Math.round(parseNum(n));
+  return v.toLocaleString('ru-RU');
+}
+
+function fmtShort(n) {
+  const v = Math.round(parseNum(n));
+  if (v >= 1000000) return (v / 1000000).toFixed(1) + 'M';
+  if (v >= 1000) return Math.round(v / 1000) + 'k';
+  return String(v);
+}
+
+function cleanName(s) {
+  return String(s || '').replace(/[⭐️❗️✨☆★🌟]/g, '').trim();
+}
+
+function getCurrentMonthSheet(monthNames) {
+  const monthMap = {
+    0: 'январ', 1: 'феврал', 2: 'март', 3: 'апрел',
+    4: 'ма', 5: 'июн', 6: 'июл', 7: 'август',
+    8: 'сентябр', 9: 'октябр', 10: 'ноябр', 11: 'декабр'
+  };
+  const now = new Date();
+  const curMonthPart = monthMap[now.getMonth()];
+  const curYear = String(now.getFullYear());
+  let found = monthNames.find(m => {
+    const lower = m.toLowerCase();
+    return lower.includes(curMonthPart) && lower.includes(curYear);
+  });
+  return found || monthNames[0];
+}
+
+function sortMonths(months) {
+  const monthIdx = {
+    'январ':1,'феврал':2,'март':3,'апрел':4,'мая':5,'май':5,
+    'июн':6,'июл':7,'август':8,'авг':8,'сентябр':9,'сен':9,
+    'октябр':10,'окт':10,'ноябр':11,'ноя':11,'декабр':12,'дек':12
+  };
+  return months.sort((a, b) => {
+    const yearA = parseInt((a.match(/\d{4}/) || ['0'])[0]);
+    const yearB = parseInt((b.match(/\d{4}/) || ['0'])[0]);
+    if (yearA !== yearB) return yearB - yearA;
+    let mA = 0, mB = 0;
+    const aL = a.toLowerCase(), bL = b.toLowerCase();
+    for (const [key, val] of Object.entries(monthIdx)) {
+      if (aL.includes(key)) mA = val;
+      if (bL.includes(key)) mB = val;
+    }
+    return mB - mA;
+  });
+}
+
+function drawSpeedometer(canvasId, value) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  const cx = W / 2, cy = H * 0.82, r = Math.min(W, H) * 0.44;
+  const val = Math.min(parseNum(value), 150);
+  const startA = Math.PI, endA = 2 * Math.PI;
+  const fillA = startA + (Math.min(val, 100) / 100) * Math.PI;
+  const color = val >= 100 ? '#2E7D32' : val >= 60 ? '#FF6B00' : '#C62828';
+
+  ctx.beginPath(); ctx.arc(cx, cy, r, startA, endA);
+  ctx.lineWidth = 14; ctx.strokeStyle = '#FFE0C2'; ctx.lineCap = 'round'; ctx.stroke();
+
+  ctx.beginPath(); ctx.arc(cx, cy, r, startA, Math.min(fillA, endA));
+  ctx.lineWidth = 14; ctx.strokeStyle = color; ctx.lineCap = 'round'; ctx.stroke();
+
+  [0, 25, 50, 75, 100].forEach(t => {
+    const a = Math.PI + (t / 100) * Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(cx + (r - 6) * Math.cos(a), cy + (r - 6) * Math.sin(a));
+    ctx.lineTo(cx + (r - 14) * Math.cos(a), cy + (r - 14) * Math.sin(a));
+    ctx.lineWidth = 1.5; ctx.strokeStyle = '#ccc'; ctx.stroke();
+  });
+
+  const na = Math.PI + (Math.min(val, 100) / 100) * Math.PI;
+  ctx.beginPath(); ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + (r * 0.62) * Math.cos(na), cy + (r * 0.62) * Math.sin(na));
+  ctx.lineWidth = 2.5; ctx.strokeStyle = '#333'; ctx.lineCap = 'round'; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx, cy, 5, 0, 2 * Math.PI);
+  ctx.fillStyle = '#333'; ctx.fill();
+}
+
+function parseMonthData(rows) {
+  const managers = [];
+  let totalRow = null;
+
+  for (let i = 3; i <= 10 && i < rows.length; i++) {
+    const r = rows[i];
+    if (!r || !r[0]) continue;
+    const name = cleanName(r[0]);
+    if (!name || name === 'nan' || name === 'NaN' || name === '') continue;
+    if (name === 'ОБЩИЙ ПЛАН ОТДЕЛА' || name === 'План') break;
+    
+    const plan = parseNum(r[1]);
+    const fact = parseNum(r[2]);
+    const pctExec = parseNum(r[3]);
+    const runRate = parseNum(r[4]);
+    const zayvok = parseNum(r[5]);
+    const perZayvok = parseNum(r[6]);
+    const forecast = parseNum(r[9]);
+    const conv = parseNum(r[10]);
+    
+    if (plan === 0 && fact === 0) continue;
+    
+    managers.push({ name, plan, fact, pctExec, runRate, zayvok, perZayvok, conv, forecast });
+  }
+
+  if (rows.length > 15 && rows[15]) {
+    totalRow = rows[15];
+  }
+
+  managers.sort((a, b) => b.pctExec - a.pctExec);
+  
+  return { managers, totalRow };
+}
+
+function renderTabs(months) {
+  const bar = document.getElementById('month-bar');
+  bar.innerHTML = '';
+  months.forEach(m => {
+    const tab = document.createElement('div');
+    tab.className = 'month-tab' + (m === currentMonth ? ' active' : '');
+    tab.textContent = m.trim();
+    tab.onclick = () => {
+      currentMonth = m;
+      renderMonth();
+      renderTabs(months);
+    };
+    bar.appendChild(tab);
+  });
+  const activeTab = bar.querySelector('.active');
+  if (activeTab) activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+function renderMonth() {
+  if (!allData || !currentMonth) return;
+  const rows = allData[currentMonth];
+  if (!rows) return;
+
+  const { managers, totalRow } = parseMonthData(rows);
+
+  const totalPlan = totalRow ? parseNum(totalRow[0]) : managers.reduce((s, m) => s + m.plan, 0);
+  const totalFact = totalRow ? parseNum(totalRow[1]) : managers.reduce((s, m) => s + m.fact, 0);
+  const totalPct = totalRow ? parseNum(totalRow[2]) : (totalPlan ? totalFact / totalPlan : 0);
+  const totalRun = totalRow ? parseNum(totalRow[3]) : 0;
+  const totalZayvok = totalRow ? parseNum(totalRow[4]) : 0;
+  const totalSales = totalRow ? parseNum(totalRow[5]) : 0;
+  const totalDays = totalRow ? parseNum(totalRow[6]) : 0;
+  const totalDaysPassed = totalRow ? parseNum(totalRow[7]) : 0;
+  const totalConv = totalRow ? parseNum(totalRow[8]) : 0;
+
+  document.getElementById('k-plan').textContent = fmt(totalPlan);
+  document.getElementById('k-fact').textContent = fmt(totalFact);
+  
+  const pctVal = totalPct * 100;
+  const factEl = document.getElementById('k-fact');
+  factEl.className = 'kpi-value ' + (pctVal >= 100 ? 'green' : pctVal >= 60 ? 'orange' : 'red');
+  
+  document.getElementById('k-conv').textContent = Math.round(totalConv * 100) + '%';
+  document.getElementById('k-sales').textContent = Math.round(totalSales);
+
+  drawSpeedometer('spd-exec', pctVal);
+  const execValEl = document.getElementById('spd-exec-val');
+  execValEl.textContent = Math.round(pctVal) + '%';
+  execValEl.style.color = pctVal >= 100 ? '#2E7D32' : pctVal >= 60 ? '#FF6B00' : '#C62828';
+
+  const runPct = totalRun * 100;
+  drawSpeedometer('spd-run', runPct);
+  const runValEl = document.getElementById('spd-run-val');
+  runValEl.textContent = Math.round(runPct) + '%';
+  runValEl.style.color = runPct >= 100 ? '#2E7D32' : runPct >= 60 ? '#FF6B00' : '#C62828';
+
+  if (rows.length > 20) {
+    document.getElementById('s-zayvki-f').textContent = fmt(rows[18] ? parseNum(rows[18][5]) : 0);
+    document.getElementById('s-zayvki-p').textContent = fmt(rows[18] ? parseNum(rows[18][1]) : 0);
+    document.getElementById('s-zvonki-f').textContent = fmt(rows[19] ? parseNum(rows[19][5]) : 0);
+    document.getElementById('s-zvonki-p').textContent = fmt(rows[19] ? parseNum(rows[19][1]) : 0);
+    document.getElementById('s-min-f').textContent = fmt(rows[20] ? parseNum(rows[20][5]) : 0);
+    document.getElementById('s-min-p').textContent = fmt(rows[20] ? parseNum(rows[20][1]) : 0);
+    document.getElementById('s-days').textContent = Math.round(totalDaysPassed);
+    document.getElementById('s-days-total').textContent = Math.round(totalDays);
+    document.getElementById('s-ost-marzhi').textContent = fmtShort(rows[18] ? parseNum(rows[18][9]) : 0);
+    document.getElementById('s-nado').textContent = fmtShort(rows[19] ? parseNum(rows[19][10]) : 0);
+  }
+
+  const tbody = document.getElementById('mgr-tbody');
+  tbody.innerHTML = '';
+  
+  managers.forEach((m, idx) => {
+    const p = Math.min(Math.round(m.pctExec * 100), 100);
+    const cls = p >= 80 ? 'high' : p >= 50 ? 'mid' : 'low';
+    const convStr = m.conv > 0 && m.conv < 5 ? Math.round(m.conv * 100) + '%' : '—';
+    const forecastStr = m.forecast > 0 ? fmt(m.forecast) : '—';
+    const perStr = m.perZayvok > 0 && m.perZayvok < 1e8 ? fmt(m.perZayvok) : '—';
+    const runColor = m.runRate * 100 >= 100 ? '#2E7D32' : m.runRate * 100 >= 60 ? '#FF6B00' : '#C62828';
+    
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="rank-cell">${idx + 1}</td>
+      <td class="name-cell">${m.name}${idx === 0 ? '<span class="badge-leader">Лидер</span>' : ''}</td>
+      <td class="money">${fmt(m.plan)}</td>
+      <td class="money" style="font-weight:600">${fmt(m.fact)}</td>
+      <td>
+        <div class="pb-wrap">
+          <div class="pb-track"><div class="pb-fill ${cls}" style="width:${p}%"></div></div>
+          <span class="pb-pct ${cls}">${Math.round(m.pctExec * 100)}%</span>
+        </div>
+      </td>
+      <td><span style="color:${runColor};font-weight:600">${Math.round(m.runRate * 100)}%</span></td>
+      <td>${Math.round(m.zayvok)}</td>
+      <td class="money">${perStr}</td>
+      <td>${convStr}</td>
+      <td class="money">${forecastStr}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const labels = managers.map(m => m.name);
+  const plans = managers.map(m => Math.round(m.plan));
+  const facts = managers.map(m => Math.round(m.fact));
+  const pcts = managers.map(m => Math.min(Math.round(m.pctExec * 100), 200));
+
+  if (chartBar) chartBar.destroy();
+  chartBar = new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'План', data: plans, backgroundColor: '#FFD4B0', borderRadius: 6, borderSkipped: false },
+        { label: 'Факт', data: facts, backgroundColor: '#FF6B00', borderRadius: 6, borderSkipped: false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { font: { size: 11 }, autoSkip: false, maxRotation: 35 }, grid: { display: false } },
+        y: { ticks: { callback: v => fmtShort(v), font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.04)' } }
+      }
+    }
+  });
+
+  if (chartHbar) chartHbar.destroy();
+  const hH = Math.max(managers.length * 42 + 40, 220);
+  document.getElementById('hbarChart').parentElement.style.height = hH + 'px';
+  chartHbar = new Chart(document.getElementById('hbarChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: '% выполнения',
+        data: pcts,
+        backgroundColor: pcts.map(p => p >= 100 ? '#2E7D32' : p >= 60 ? '#FF6B00' : '#C62828'),
+        borderRadius: 6, borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { max: Math.max(120, ...pcts.map(p => p + 10)), ticks: { callback: v => v + '%', font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.04)' } },
+        y: { ticks: { font: { size: 12, weight: 500 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+async function loadData() {
+  const btn = document.getElementById('refreshBtn');
+  const err = document.getElementById('error-bar');
+  const loading = document.getElementById('loading');
+  
+  btn.classList.add('loading');
+  err.style.display = 'none';
+  
+  try {
+    const resp = await fetch(API_URL);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    
+    const text = await resp.text();
+    
+    if (text.includes('accounts.google.com') || text.includes('ServiceLogin')) {
+      throw new Error('AUTH_REQUIRED');
+    }
+    
+    allData = JSON.parse(text);
+    
+    const excludePatterns = ['аналитика', 'календарь', 'задачи', 'проигранные', 'тестовый', 'архивный', 'копия', 'годовая'];
+    const months = Object.keys(allData).filter(k => {
+      const lower = k.toLowerCase();
+      return !excludePatterns.some(p => lower.includes(p));
+    });
+    
+    const sorted = sortMonths(months);
+    
+    if (!currentMonth || !allData[currentMonth]) {
+      currentMonth = getCurrentMonthSheet(sorted);
+    }
+    
+    renderTabs(sorted);
+    renderMonth();
+    
+    const now = new Date();
+    document.getElementById('update-time').textContent = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    
+  } catch (e) {
+    console.error('Ошибка загрузки:', e);
+    
+    if (e.message === 'AUTH_REQUIRED') {
+      err.innerHTML = '🔒 <b>Ошибка доступа.</b> Google Apps Script требует авторизации.<br>Откройте Apps Script → Развёртывание → настройте доступ <b>«Все»</b>.';
+    } else {
+      err.innerHTML = '⚠️ <b>Ошибка загрузки данных.</b> Проверьте доступность Google Таблицы.<br><small>' + e.message + '</small>';
+    }
+    err.style.display = 'block';
+  }
+  
+  btn.classList.remove('loading');
+  loading.classList.add('hidden');
+}
+
+loadData();
+setInterval(loadData, 5 * 60 * 1000);
+</script>
+</body>
+</html>
