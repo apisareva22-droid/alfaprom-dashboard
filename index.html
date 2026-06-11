@@ -139,13 +139,6 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--gray);border-to
 <div class="gauge-card"><div class="gauge-title">Скорость</div><canvas id="spd-run" width="200" height="120"></canvas><div class="gauge-value" id="spd-run-val">—</div></div>
 </div>
 
-<!-- 3. KPI РОПа -->
-<div class="section-title">KPI РОПа</div>
-<div class="rop-grid">
-<div class="rop-card"><div class="rop-label">Кол-во продаж</div><div class="rop-value" id="rop-sales">—</div><div class="rop-plan">план: <span id="rop-sales-plan">—</span></div></div>
-<div class="rop-card"><div class="rop-label">Средняя маржинальность</div><div class="rop-value" id="rop-margin">—</div><div class="rop-plan">план: <span id="rop-margin-plan">—</span></div></div>
-<div class="rop-card"><div class="rop-label">Средний чек (чистая)</div><div class="rop-value" id="rop-check">—</div><div class="rop-plan">план: <span id="rop-check-plan">—</span></div></div>
-</div>
 
 <!-- 4. АКТИВНОСТЬ -->
 <div class="section-title">Активность</div>
@@ -164,6 +157,15 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--gray);border-to
 <div class="chart-card"><div class="chart-title">Факт vs План</div><div class="chart-legend"><span><i style="background:var(--gray-light)"></i>План</span><span><i style="background:var(--primary)"></i>Факт</span></div><div style="position:relative;height:280px"><canvas id="barChart"></canvas></div></div>
 <div class="chart-card"><div class="chart-title">Процент выполнения</div><div style="position:relative;height:280px"><canvas id="hbarChart"></canvas></div></div>
 </div>
+
+  <!-- 3. KPI РОПа -->
+<div class="section-title">KPI РОПа</div>
+<div class="rop-grid">
+<div class="rop-card"><div class="rop-label">Кол-во продаж</div><div class="rop-value" id="rop-sales">—</div><div class="rop-plan">план: <span id="rop-sales-plan">—</span></div></div>
+<div class="rop-card"><div class="rop-label">Средняя маржинальность</div><div class="rop-value" id="rop-margin">—</div><div class="rop-plan">план: <span id="rop-margin-plan">—</span></div></div>
+<div class="rop-card"><div class="rop-label">Средний чек (чистая)</div><div class="rop-value" id="rop-check">—</div><div class="rop-plan">план: <span id="rop-check-plan">—</span></div></div>
+</div>
+
 </main>
 <footer><strong>АЛЬФАПРОМ</strong> · Данные обновляются автоматически каждые 5 минут</footer>
 <script>
