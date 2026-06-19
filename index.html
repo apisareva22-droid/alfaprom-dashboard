@@ -179,8 +179,8 @@ function fmtShort(n){const v=Math.round(parseNum(n));if(v>=1e6)return(v/1e6).toF
 function cleanName(s){return String(s||'').replace(/[⭐️❗️✨☆★🌟]/g,'').trim()}
 
 // Светофор: зеленый >= 80%, желтый >= 50%, красный < 50%
-function getColorClass(pct){if(pct>=80)return'clr-green';if(pct>=50)return'clr-yellow';return'clr-red'}
-function getColor(pct){if(pct>=80)return COLORS.success;if(pct>=50)return COLORS.warning;return COLORS.danger}
+function getColorClass(pct){if(pct>=100)return'clr-green';if(pct>=80)return'clr-yellow';return'clr-red'}
+function getColor(pct){if(pct>=100)return COLORS.success;if(pct>=80)return COLORS.warning;return COLORS.danger}
 
 function getCurrentMonthSheet(monthNames){const monthMap={0:'январ',1:'феврал',2:'март',3:'апрел',4:'ма',5:'июн',6:'июл',7:'август',8:'сентябр',9:'октябр',10:'ноябр',11:'декабр'};const now=new Date();const curMonthPart=monthMap[now.getMonth()];const curYear=String(now.getFullYear());let found=monthNames.find(m=>{const lower=m.toLowerCase();return lower.includes(curMonthPart)&&lower.includes(curYear)});return found||monthNames[0]}
 function sortMonths(months){const monthIdx={'январ':1,'феврал':2,'март':3,'апрел':4,'мая':5,'май':5,'июн':6,'июл':7,'август':8,'авг':8,'сентябр':9,'сен':9,'октябр':10,'окт':10,'ноябр':11,'ноя':11,'декабр':12,'дек':12};return months.sort((a,b)=>{const yearA=parseInt((a.match(/\d{4}/)||['0'])[0]);const yearB=parseInt((b.match(/\d{4}/)||['0'])[0]);if(yearA!==yearB)return yearB-yearA;let mA=0,mB=0;const aL=a.toLowerCase(),bL=b.toLowerCase();for(const[key,val]of Object.entries(monthIdx)){if(aL.includes(key))mA=val;if(bL.includes(key))mB=val}return mB-mA})}
