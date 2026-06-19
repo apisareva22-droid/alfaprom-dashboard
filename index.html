@@ -178,7 +178,7 @@ function fmt(n){return Math.round(parseNum(n)).toLocaleString('ru-RU')}
 function fmtShort(n){const v=Math.round(parseNum(n));if(v>=1e6)return(v/1e6).toFixed(1)+'M';if(v>=1e3)return Math.round(v/1e3)+'k';return String(v)}
 function cleanName(s){return String(s||'').replace(/[⭐️❗️✨☆★🌟]/g,'').trim()}
 
-// Светофор: зеленый >= 80%, желтый >= 50%, красный < 50%
+// Светофор: зеленый >= 100%, желтый >= 80%, красный < 80%
 function getColorClass(pct){if(pct>=100)return'clr-green';if(pct>=80)return'clr-yellow';return'clr-red'}
 function getColor(pct){if(pct>=100)return COLORS.success;if(pct>=80)return COLORS.warning;return COLORS.danger}
 
@@ -291,7 +291,7 @@ const medals=['🥇','🥈','🥉'];
 managers.forEach((m,idx)=>{
   const p=Math.round(m.pctExec*100);
   const pCapped=Math.min(p,100);
-  const cls=p>=80?'high':p>=50?'mid':'low';
+  const cls=p>=100?'high':p>=80?'mid':'low';
   const convStr=m.conv>0&&m.conv<5?Math.round(m.conv*100)+'%':'—';
   const forecastStr=m.forecast>0?fmt(m.forecast):'—';
   const perStr=m.perZayvok>0&&m.perZayvok<1e8?fmt(m.perZayvok):'—';
