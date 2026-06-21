@@ -234,39 +234,49 @@ runValEl.textContent=Math.round(runPct)+'%';
 runValEl.className='gauge-value '+getColorClass(runPct);
 
 // KPI РОПа
-if(rows.length>15){
-  // Кол-во продаж - факт из totalRow[5], план из N14 (rows[13][13])
-  document.getElementById('rop-sales').textContent=Math.round(totalSales);
-  document.getElementById('rop-sales-plan').textContent=rows[13]&&rows[13][13]?parseNum(rows[13][13]):'65';
+if (rows.length > 15) {
+  // 1. Кол-во продаж
+  const ropSalesPlan = rows[13] && rows[13][13] ? parseNum(rows[13][13]) : 65;
+  const ropSalesFact = Math.round(totalSales);
 
-  // Получение значения процента выполнения
-var convText = document.getElementById('k-conv').textContent;
-var pctValue = parseFloat(convText.replace(/[^0-9.,]/g, '').replace(',', '.'));
-if (!isNaN(pctValue)) {
-  var el = document.getElementById('k-conv');
-  el.classList.remove('clr-red', 'clr-yellow', 'clr-green');
-  if (pctValue < 80) {
-    el.classList.add('clr-red');
-  } else if (pctValue >= 80 && pctValue < 100) {
-    el.classList.add('clr-yellow');
+  const ropSalesEl = document.getElementById('rop-sales');
+  ropSalesEl.textContent = ropSalesFact;
+  ropSalesEl.classList.remove('clr-red', 'clr-yellow', 'clr-green');
+  ropSalesEl.classList.add(ropSalesFact >= ropSalesPlan ? 'clr-green' : 'clr-red');
+
+  document.getElementById('rop-sales-plan').textContent = ropSalesPlan;
+
+  // 2. Средняя чистая маржинальность
+  const ropCheckPlan = rows[14] && rows[14][13] ? parseNum(rows[14][13]) : 42000;
+  const ropCheckFact = totalSales > 0 ? Math.round(totalFact / totalSales) : 0;
+
+  const ropCheckEl = document.getElementById('rop-check');
+  ropCheckEl.textContent = fmtShort(ropCheckFact);
+  ropCheckEl.classList.remove('clr-red', 'clr-yellow', 'clr-green');
+  ropCheckEl.classList.add(ropCheckFact >= ropCheckPlan ? 'clr-green' : 'clr-red');
+
+  document.getElementById('rop-check-plan').textContent = fmtShort(ropCheckPlan);
+
+  // 3. Средняя маржинальность
+  const ropMarginPlan = rows[15] && rows[15][13] ? parseNum(rows[15][13]) : 0.2;
+
+  // если у вас в totalFact уже маржа отдела, то средняя маржинальность лучше брать из таблицы,
+  // но если отдельного факта нет — используем значение из строки 15 / столбца 14 или план
+  let ropMarginFact = 0;
+  if (rows[15] && rows[15][14] !== undefined && rows[15][14] !== '') {
+    ropMarginFact = parseNum(rows[15][14]);
   } else {
-    el.classList.add('clr-green');
+    ropMarginFact = ropMarginPlan;
   }
-}
-  
-  // Средняя маржинальность - план из N16 (rows[15][13])
-  const avgMarginPlan=rows[15]&&rows[15][13]?parseNum(rows[15][13]):0.2;
-  const avgMargin=totalSales>0?(totalFact/totalSales)/totalPlan*totalSales:0;
-  document.getElementById('rop-margin').textContent=Math.round(avgMarginPlan*100)+'%';
-  document.getElementById('rop-margin-plan').textContent=Math.round(avgMarginPlan*100)+'%';
-  
-  // Средний чек - план из N15 (rows[14][13])
-  const avgCheckPlan=rows[14]&&rows[14][13]?parseNum(rows[14][13]):42000;
-  const avgCheck=totalSales>0?Math.round(totalFact/totalSales):0;
-  document.getElementById('rop-check').textContent=fmtShort(avgCheck);
-  document.getElementById('rop-check-plan').textContent=fmtShort(avgCheckPlan);
 
+  const ropMarginEl = document.getElementById('rop-margin');
+  ropMarginEl.textContent = Math.round(ropMarginFact * 100) + '%';
+  ropMarginEl.classList.remove('clr-red', 'clr-yellow', 'clr-green');
+  ropMarginEl.classList.add(ropMarginFact >= ropMarginPlan ? 'clr-green' : 'clr-red');
+
+  document.getElementById('rop-margin-plan').textContent = Math.round(ropMarginPlan * 100) + '%';
 }
+
 
 // Активность
 if(rows.length>20){
