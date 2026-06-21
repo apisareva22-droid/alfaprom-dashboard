@@ -238,18 +238,6 @@ if(rows.length>15){
   // Кол-во продаж - факт из totalRow[5], план из N14 (rows[13][13])
   document.getElementById('rop-sales').textContent=Math.round(totalSales);
   document.getElementById('rop-sales-plan').textContent=rows[13]&&rows[13][13]?parseNum(rows[13][13]):'65';
-  
-  // Средняя маржинальность - план из N16 (rows[15][13])
-  const avgMarginPlan=rows[15]&&rows[15][13]?parseNum(rows[15][13]):0.2;
-  const avgMargin=totalSales>0?(totalFact/totalSales)/totalPlan*totalSales:0;
-  document.getElementById('rop-margin').textContent=Math.round(avgMarginPlan*100)+'%';
-  document.getElementById('rop-margin-plan').textContent=Math.round(avgMarginPlan*100)+'%';
-  
-  // Средний чек - план из N15 (rows[14][13])
-  const avgCheckPlan=rows[14]&&rows[14][13]?parseNum(rows[14][13]):42000;
-  const avgCheck=totalSales>0?Math.round(totalFact/totalSales):0;
-  document.getElementById('rop-check').textContent=fmtShort(avgCheck);
-  document.getElementById('rop-check-plan').textContent=fmtShort(avgCheckPlan);
 
   // Получение значения процента выполнения
 var convText = document.getElementById('k-conv').textContent;
@@ -265,6 +253,18 @@ if (!isNaN(pctValue)) {
     el.classList.add('clr-green');
   }
 }
+  
+  // Средняя маржинальность - план из N16 (rows[15][13])
+  const avgMarginPlan=rows[15]&&rows[15][13]?parseNum(rows[15][13]):0.2;
+  const avgMargin=totalSales>0?(totalFact/totalSales)/totalPlan*totalSales:0;
+  document.getElementById('rop-margin').textContent=Math.round(avgMarginPlan*100)+'%';
+  document.getElementById('rop-margin-plan').textContent=Math.round(avgMarginPlan*100)+'%';
+  
+  // Средний чек - план из N15 (rows[14][13])
+  const avgCheckPlan=rows[14]&&rows[14][13]?parseNum(rows[14][13]):42000;
+  const avgCheck=totalSales>0?Math.round(totalFact/totalSales):0;
+  document.getElementById('rop-check').textContent=fmtShort(avgCheck);
+  document.getElementById('rop-check-plan').textContent=fmtShort(avgCheckPlan);
 
 }
 
