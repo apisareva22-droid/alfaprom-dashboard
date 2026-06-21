@@ -238,6 +238,25 @@ if(rows.length>15){
   // Кол-во продаж - факт из totalRow[5], план из N14 (rows[13][13])
   document.getElementById('rop-sales').textContent=Math.round(totalSales);
   document.getElementById('rop-sales-plan').textContent=rows[13]&&rows[13][13]?parseNum(rows[13][13]):'65';
+
+  {
+  // Получение значения процента выполнение
+  var pctValue = parseFloat(document.getElementById('k-conv').textContent);
+  if (!isNaN(pctValue)) {
+    // Определение цвета по правилам
+    var colorClass = '';
+    if (pctValue < 80) {
+      colorClass = 'clr-red'; // красный
+    } else if (pctValue >= 80 && pctValue < 100) {
+      colorClass = 'clr-yellow'; // желтый
+    } else {
+      colorClass = 'clr-green'; // зеленый
+    }
+    // Обновляем класс состояния
+    var el = document.getElementById('k-conv');
+    el.className = 'kpi-value ' + colorClass;
+  }
+}
   
   // Средняя маржинальность - план из N16 (rows[15][13])
   const avgMarginPlan=rows[15]&&rows[15][13]?parseNum(rows[15][13]):0.2;
