@@ -197,6 +197,10 @@ const rows=allData[currentMonth];
   console.log('Строка 14 (продажи):', rows[13]);
 console.log('Строка 15 (чек):', rows[14]);
 console.log('Строка 16 (маржа):', rows[15]);
+  console.log('Row14:', JSON.stringify(allData[currentMonth][13]));
+console.log('Row15:', JSON.stringify(allData[currentMonth][14]));
+console.log('Row16:', JSON.stringify(allData[currentMonth][15]));
+
 
 if(!rows)return;
 const{managers,totalRow}=parseMonthData(rows);
