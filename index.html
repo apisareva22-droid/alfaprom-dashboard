@@ -169,8 +169,9 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--gray);border-to
 </main>
 <footer><strong>АЛЬФАПРОМ</strong> · Данные обновляются автоматически каждые 5 минут</footer>
 <script>
-const API_URL="https://script.google.com/macros/s/AKfycbw-UHktigdNkhrIdeS5yhSaUSxv4WBvWgCT4vCHBe6JKM-IwC7fAITA3J29n7JiFrn-Aw/exec";
-let allData=null,currentMonth=null,chartBar=null,chartHbar=null;
+const API_URL="https://script.google.com/macros/s/AKfycbzMxb5eE598Oxtk4IUr0jMt7cFfG5uL1UQuu076BuglFtNQp5X8Mi5-Wd8ldYFqyu3vxQ/exec";
+
+  let allData=null,currentMonth=null,chartBar=null,chartHbar=null;
 const COLORS={primary:'#f0871b',primaryBright:'#ff8100',gray:'#acacac',grayLight:'#e8e8e8',success:'#00a651',warning:'#f9a825',danger:'#e53935'};
 
 function parseNum(v){if(v===null||v===undefined||v===''||typeof v==='object')return 0;const s=String(v).replace(/\s/g,'').replace(',','.');if(s.startsWith('#')||s==='NaN'||s==='nan')return 0;const n=parseFloat(s);return isNaN(n)?0:n}
@@ -241,21 +242,21 @@ const runValEl=document.getElementById('spd-run-val');
 runValEl.textContent=Math.round(runPct)+'%';
 runValEl.className='gauge-value '+getColorClass(runPct);
 
-// KPI РОПа — значения напрямую из таблицы, без вычислений
+// KPI РОПа — чистое чтение значений из таблицы, без вычислений
 
-// 1. Кол-во продаж: строка 14, столбец 15 (O14)
-const ropSalesFact = rows[13] && rows[13][14] !== undefined && rows[13][14] !== '' ? parseNum(rows[13][14]) : 0;
-const ropSalesPlan = rows[13] && rows[13][13] !== undefined && rows[13][13] !== '' ? parseNum(rows[13][13]) : 65;
+// 1. Кол-во продаж: строка 14, план в столбце N (13), факт в столбце O (14)
+const ropSalesPlan = parseNum(rows[13][13]);
+const ropSalesFact = parseNum(rows[13][14]);
 
 const ropSalesEl = document.getElementById('rop-sales');
-ropSalesEl.textContent = Math.round(ropSalesFact);
+ropSalesEl.textContent = ropSalesFact;
 ropSalesEl.classList.remove('clr-red', 'clr-yellow', 'clr-green');
 ropSalesEl.classList.add(ropSalesFact >= ropSalesPlan ? 'clr-green' : 'clr-red');
-document.getElementById('rop-sales-plan').textContent = Math.round(ropSalesPlan);
+document.getElementById('rop-sales-plan').textContent = ropSalesPlan;
 
-// 2. Средняя чистая (средний чек): строка 15, столбец 15 (O15)
-const ropCheckFact = rows[14] && rows[14][14] !== undefined && rows[14][14] !== '' ? parseNum(rows[14][14]) : 0;
-const ropCheckPlan = rows[14] && rows[14][13] !== undefined && rows[14][13] !== '' ? parseNum(rows[14][13]) : 42000;
+// 2. Средняя чистая (чек): строка 15, план в N (13), факт в O (14)
+const ropCheckPlan = parseNum(rows[14][13]);
+const ropCheckFact = parseNum(rows[14][14]);
 
 const ropCheckEl = document.getElementById('rop-check');
 ropCheckEl.textContent = fmtShort(ropCheckFact);
@@ -263,9 +264,9 @@ ropCheckEl.classList.remove('clr-red', 'clr-yellow', 'clr-green');
 ropCheckEl.classList.add(ropCheckFact >= ropCheckPlan ? 'clr-green' : 'clr-red');
 document.getElementById('rop-check-plan').textContent = fmtShort(ropCheckPlan);
 
-// 3. Средняя маржинальность: строка 16, столбец 15 (O16)
-const ropMarginFact = rows[15] && rows[15][14] !== undefined && rows[15][14] !== '' ? parseNum(rows[15][14]) : 0;
-const ropMarginPlan = rows[15] && rows[15][13] !== undefined && rows[15][13] !== '' ? parseNum(rows[15][13]) : 0.2;
+// 3. Средняя маржинальность: строка 16, план в N (13), факт в O (14)
+const ropMarginPlan = parseNum(rows[15][13]);
+const ropMarginFact = parseNum(rows[15][14]);
 
 const ropMarginEl = document.getElementById('rop-margin');
 ropMarginEl.textContent = Math.round(ropMarginFact * 100) + '%';
