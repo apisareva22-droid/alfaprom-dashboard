@@ -261,7 +261,7 @@ if (rows.length > 15) {
   const ropMarginPlan = rows[16] && rows[16][15] ? parseNum(rows[16][15]) : 0.2;
 
   // если у вас в totalFact уже маржа отдела, то средняя маржинальность лучше брать из таблицы,
-  // но если отдельного факта нет — используем значение из строки 15 / столбца 14 или план
+  // но если отдельного факта нет — используем значение из строки 16 / столбца 15 или план
   let ropMarginFact = 0;
   if (rows[16] && rows[16][15] !== undefined && rows[16][15] !== '') {
     ropMarginFact = parseNum(rows[16][15]);
@@ -270,7 +270,7 @@ if (rows.length > 15) {
   }
 
   const ropMarginEl = document.getElementById('rop-margin');
-  ropMarginEl.textContent = Math.round(ropMarginFact * 100) + '%';
+  ropMarginEl.textContent = Math.floor(ropMarginFact * 100) + '%';
   ropMarginEl.classList.remove('clr-red', 'clr-yellow', 'clr-green');
   ropMarginEl.classList.add(ropMarginFact >= ropMarginPlan ? 'clr-green' : 'clr-red');
 
