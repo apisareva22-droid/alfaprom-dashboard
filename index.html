@@ -194,6 +194,10 @@ function renderTabs(months){const bar=document.getElementById('month-bar');bar.i
 function renderMonth(){
 if(!allData||!currentMonth)return;
 const rows=allData[currentMonth];
+  console.log('Строка 14 (продажи):', rows[13]);
+console.log('Строка 15 (чек):', rows[14]);
+console.log('Строка 16 (маржа):', rows[15]);
+
 if(!rows)return;
 const{managers,totalRow}=parseMonthData(rows);
 
