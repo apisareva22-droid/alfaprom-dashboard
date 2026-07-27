@@ -330,7 +330,7 @@ managers.forEach((m,idx)=>{
   const tr=document.createElement('tr');
   tr.innerHTML=`
     <td class="cell-rank">${idx+1}</td>
-    <td class="cell-name">${m.name}${medal}${star}</td>
+    <td class="cell-name">${star}${m.name}${medal}</td>
     <td class="cell-money">${fmt(m.plan)}</td>
     <td class="cell-money ${getColorClass(p)}" style="font-weight:700">${fmt(m.fact)}</td>
     <td><div class="progress-wrap"><div class="progress-track"><div class="progress-fill ${cls}" style="width:${pCapped}%"></div></div><span class="progress-pct ${getColorClass(p)}">${p}%</span></div></td>
