@@ -233,49 +233,38 @@ const runValEl=document.getElementById('spd-run-val');
 runValEl.textContent=Math.round(runPct)+'%';
 runValEl.className='gauge-value '+getColorClass(runPct);
 
-// KPI РОПа
-if (rows.length > 15) {
-  // 1. Кол-во продаж
-  const ropSalesPlan = rows[14] && rows[14][15] ? parseNum(rows[14][15]) : 65;
-  const ropSalesFact = Math.round(totalSales);
+// KPI РОПа — значения напрямую из таблицы, без вычислений
 
-  const ropSalesEl = document.getElementById('rop-sales');
-  ropSalesEl.textContent = ropSalesFact;
-  ropSalesEl.classList.remove('clr-red', 'clr-yellow', 'clr-green');
-  ropSalesEl.classList.add(ropSalesFact >= ropSalesPlan ? 'clr-green' : 'clr-red');
+// 1. Кол-во продаж: строка 14, столбец 15 (O14)
+const ropSalesFact = rows[13] && rows[13][14] !== undefined && rows[13][14] !== '' ? parseNum(rows[13][14]) : 0;
+const ropSalesPlan = rows[13] && rows[13][13] !== undefined && rows[13][13] !== '' ? parseNum(rows[13][13]) : 65;
 
-  document.getElementById('rop-sales-plan').textContent = ropSalesPlan;
+const ropSalesEl = document.getElementById('rop-sales');
+ropSalesEl.textContent = Math.round(ropSalesFact);
+ropSalesEl.classList.remove('clr-red', 'clr-yellow', 'clr-green');
+ropSalesEl.classList.add(ropSalesFact >= ropSalesPlan ? 'clr-green' : 'clr-red');
+document.getElementById('rop-sales-plan').textContent = Math.round(ropSalesPlan);
 
-  // 2. Средняя чистая маржинальность
-  const ropCheckPlan = rows[15] && rows[15][15] ? parseNum(rows[15][15]) : 42000;
-  const ropCheckFact = totalSales > 0 ? Math.round(totalFact / totalSales) : 0;
+// 2. Средняя чистая (средний чек): строка 15, столбец 15 (O15)
+const ropCheckFact = rows[14] && rows[14][14] !== undefined && rows[14][14] !== '' ? parseNum(rows[14][14]) : 0;
+const ropCheckPlan = rows[14] && rows[14][13] !== undefined && rows[14][13] !== '' ? parseNum(rows[14][13]) : 42000;
 
-  const ropCheckEl = document.getElementById('rop-check');
-  ropCheckEl.textContent = fmtShort(ropCheckFact);
-  ropCheckEl.classList.remove('clr-red', 'clr-yellow', 'clr-green');
-  ropCheckEl.classList.add(ropCheckFact >= ropCheckPlan ? 'clr-green' : 'clr-red');
+const ropCheckEl = document.getElementById('rop-check');
+ropCheckEl.textContent = fmtShort(ropCheckFact);
+ropCheckEl.classList.remove('clr-red', 'clr-yellow', 'clr-green');
+ropCheckEl.classList.add(ropCheckFact >= ropCheckPlan ? 'clr-green' : 'clr-red');
+document.getElementById('rop-check-plan').textContent = fmtShort(ropCheckPlan);
 
-  document.getElementById('rop-check-plan').textContent = fmtShort(ropCheckPlan);
+// 3. Средняя маржинальность: строка 16, столбец 15 (O16)
+const ropMarginFact = rows[15] && rows[15][14] !== undefined && rows[15][14] !== '' ? parseNum(rows[15][14]) : 0;
+const ropMarginPlan = rows[15] && rows[15][13] !== undefined && rows[15][13] !== '' ? parseNum(rows[15][13]) : 0.2;
 
-  // 3. Средняя маржинальность
-  const ropMarginPlan = rows[16] && rows[16][15] ? parseNum(rows[16][15]) : 0.2;
+const ropMarginEl = document.getElementById('rop-margin');
+ropMarginEl.textContent = Math.round(ropMarginFact * 100) + '%';
+ropMarginEl.classList.remove('clr-red', 'clr-yellow', 'clr-green');
+ropMarginEl.classList.add(ropMarginFact >= ropMarginPlan ? 'clr-green' : 'clr-red');
+document.getElementById('rop-margin-plan').textContent = Math.round(ropMarginPlan * 100) + '%';
 
-  // если у вас в totalFact уже маржа отдела, то средняя маржинальность лучше брать из таблицы,
-  // но если отдельного факта нет — используем значение из строки 16 / столбца 15 или план
-  let ropMarginFact = 0;
-  if (rows[16] && rows[16][15] !== undefined && rows[16][15] !== '') {
-    ropMarginFact = parseNum(rows[16][15]);
-  } else {
-    ropMarginFact = ropMarginPlan;
-  }
-
-  const ropMarginEl = document.getElementById('rop-margin');
-  ropMarginEl.textContent = Math.floor(ropMarginFact * 100) + '%';
-  ropMarginEl.classList.remove('clr-red', 'clr-yellow', 'clr-green');
-  ropMarginEl.classList.add(ropMarginFact >= ropMarginPlan ? 'clr-green' : 'clr-red');
-
-  document.getElementById('rop-margin-plan').textContent = Math.round(ropMarginPlan * 100) + '%';
-}
 
 
 // Активность
