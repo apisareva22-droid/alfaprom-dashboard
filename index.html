@@ -186,7 +186,10 @@ function getColor(pct){if(pct>=100)return COLORS.success;if(pct>=80)return COLOR
 function getCurrentMonthSheet(monthNames){const monthMap={0:'январ',1:'феврал',2:'март',3:'апрел',4:'ма',5:'июн',6:'июл',7:'август',8:'сентябр',9:'октябр',10:'ноябр',11:'декабр'};const now=new Date();const curMonthPart=monthMap[now.getMonth()];const curYear=String(now.getFullYear());let found=monthNames.find(m=>{const lower=m.toLowerCase();return lower.includes(curMonthPart)&&lower.includes(curYear)});return found||monthNames[0]}
 function sortMonths(months){const monthIdx={'январ':1,'феврал':2,'март':3,'апрел':4,'мая':5,'май':5,'июн':6,'июл':7,'август':8,'авг':8,'сентябр':9,'сен':9,'октябр':10,'окт':10,'ноябр':11,'ноя':11,'декабр':12,'дек':12};return months.sort((a,b)=>{const yearA=parseInt((a.match(/\d{4}/)||['0'])[0]);const yearB=parseInt((b.match(/\d{4}/)||['0'])[0]);if(yearA!==yearB)return yearB-yearA;let mA=0,mB=0;const aL=a.toLowerCase(),bL=b.toLowerCase();for(const[key,val]of Object.entries(monthIdx)){if(aL.includes(key))mA=val;if(bL.includes(key))mB=val}return mB-mA})}
 function drawSpeedometer(canvasId,value){const canvas=document.getElementById(canvasId);if(!canvas)return;const ctx=canvas.getContext('2d');const W=canvas.width,H=canvas.height;ctx.clearRect(0,0,W,H);const cx=W/2,cy=H*0.88,r=Math.min(W,H)*0.5;const val=Math.min(parseNum(value),150);const startA=Math.PI,endA=2*Math.PI;const fillA=startA+(Math.min(val,100)/100)*Math.PI;const color=getColor(val);ctx.beginPath();ctx.arc(cx,cy,r,startA,endA);ctx.lineWidth=18;ctx.strokeStyle=COLORS.grayLight;ctx.lineCap='round';ctx.stroke();ctx.beginPath();ctx.arc(cx,cy,r,startA,Math.min(fillA,endA));ctx.lineWidth=18;ctx.strokeStyle=color;ctx.lineCap='round';ctx.stroke();const na=Math.PI+(Math.min(val,100)/100)*Math.PI;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+(r*0.65)*Math.cos(na),cy+(r*0.65)*Math.sin(na));ctx.lineWidth=3;ctx.strokeStyle='#333';ctx.lineCap='round';ctx.stroke();ctx.beginPath();ctx.arc(cx,cy,7,0,2*Math.PI);ctx.fillStyle='#333';ctx.fill()}
-function parseMonthData(rows){const managers=[];let totalRow=null;for(let i=3;i<=10&&i<rows.length;i++){const r=rows[i];if(!r||!r[0])continue;const name=cleanName(r[0]);if(!name||name==='nan'||name==='NaN'||name==='')continue;if(name==='ОБЩИЙ ПЛАН ОТДЕЛА'||name==='План')break;const plan=parseNum(r[1]);const fact=parseNum(r[2]);const pctExec=parseNum(r[3]);const runRate=parseNum(r[4]);const zayvok=parseNum(r[5]);const perZayvok=parseNum(r[6]);const forecast=parseNum(r[9]);const conv=parseNum(r[10]);if(plan===0&&fact===0)continue;managers.push({name,plan,fact,pctExec,runRate,zayvok,perZayvok,conv,forecast})}if(rows.length>15&&rows[15]){totalRow=rows[15]}
+function parseMonthData(rows){const managers=[];let totalRow=null;for(let i=3;i<=10&&i<rows.length;i++){const r=rows[i];if(!r||!r[0])continue;const rawName=String(r[0]||'');
+const hasStar=/[⭐️★🌟]/.test(rawName);
+const name=cleanName(r[0]);
+;if(!name||name==='nan'||name==='NaN'||name==='')continue;if(name==='ОБЩИЙ ПЛАН ОТДЕЛА'||name==='План')break;const plan=parseNum(r[1]);const fact=parseNum(r[2]);const pctExec=parseNum(r[3]);const runRate=parseNum(r[4]);const zayvok=parseNum(r[5]);const perZayvok=parseNum(r[6]);const forecast=parseNum(r[9]);const conv=parseNum(r[10]);if(plan===0&&fact===0)continue;managers.push({name,plan,fact,pctExec,runRate,zayvok,perZayvok,conv,forecast,hasStar})}if(rows.length>15&&rows[15]){totalRow=rows[15]}
 // Сортировка по ФАКТУ (марже), не по проценту!
 managers.sort((a,b)=>b.fact-a.fact);
 return{managers,totalRow}}
@@ -321,11 +324,13 @@ managers.forEach((m,idx)=>{
   const perStr=m.perZayvok>0&&m.perZayvok<1e8?fmt(m.perZayvok):'—';
   const runColor=getColor(m.runRate*100);
   const medal=idx<3?`<span class="medal">${medals[idx]}</span>`:'';
+  const star=m.hasStar?`<span style="margin-left:6px;color:#ffb300">⭐️</span>`:'';
+
   
   const tr=document.createElement('tr');
   tr.innerHTML=`
     <td class="cell-rank">${idx+1}</td>
-    <td class="cell-name">${m.name}${medal}</td>
+    <td class="cell-name">${m.name}${medal}${star}</td>
     <td class="cell-money">${fmt(m.plan)}</td>
     <td class="cell-money ${getColorClass(p)}" style="font-weight:700">${fmt(m.fact)}</td>
     <td><div class="progress-wrap"><div class="progress-track"><div class="progress-fill ${cls}" style="width:${pCapped}%"></div></div><span class="progress-pct ${getColorClass(p)}">${p}%</span></div></td>
