@@ -186,10 +186,10 @@ function getColor(pct){if(pct>=100)return COLORS.success;if(pct>=80)return COLOR
 function getCurrentMonthSheet(monthNames){const monthMap={0:'январ',1:'феврал',2:'март',3:'апрел',4:'ма',5:'июн',6:'июл',7:'август',8:'сентябр',9:'октябр',10:'ноябр',11:'декабр'};const now=new Date();const curMonthPart=monthMap[now.getMonth()];const curYear=String(now.getFullYear());let found=monthNames.find(m=>{const lower=m.toLowerCase();return lower.includes(curMonthPart)&&lower.includes(curYear)});return found||monthNames[0]}
 function sortMonths(months){const monthIdx={'январ':1,'феврал':2,'март':3,'апрел':4,'мая':5,'май':5,'июн':6,'июл':7,'август':8,'авг':8,'сентябр':9,'сен':9,'октябр':10,'окт':10,'ноябр':11,'ноя':11,'декабр':12,'дек':12};return months.sort((a,b)=>{const yearA=parseInt((a.match(/\d{4}/)||['0'])[0]);const yearB=parseInt((b.match(/\d{4}/)||['0'])[0]);if(yearA!==yearB)return yearB-yearA;let mA=0,mB=0;const aL=a.toLowerCase(),bL=b.toLowerCase();for(const[key,val]of Object.entries(monthIdx)){if(aL.includes(key))mA=val;if(bL.includes(key))mB=val}return mB-mA})}
 function drawSpeedometer(canvasId,value){const canvas=document.getElementById(canvasId);if(!canvas)return;const ctx=canvas.getContext('2d');const W=canvas.width,H=canvas.height;ctx.clearRect(0,0,W,H);const cx=W/2,cy=H*0.88,r=Math.min(W,H)*0.5;const val=Math.min(parseNum(value),150);const startA=Math.PI,endA=2*Math.PI;const fillA=startA+(Math.min(val,100)/100)*Math.PI;const color=getColor(val);ctx.beginPath();ctx.arc(cx,cy,r,startA,endA);ctx.lineWidth=18;ctx.strokeStyle=COLORS.grayLight;ctx.lineCap='round';ctx.stroke();ctx.beginPath();ctx.arc(cx,cy,r,startA,Math.min(fillA,endA));ctx.lineWidth=18;ctx.strokeStyle=color;ctx.lineCap='round';ctx.stroke();const na=Math.PI+(Math.min(val,100)/100)*Math.PI;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+(r*0.65)*Math.cos(na),cy+(r*0.65)*Math.sin(na));ctx.lineWidth=3;ctx.strokeStyle='#333';ctx.lineCap='round';ctx.stroke();ctx.beginPath();ctx.arc(cx,cy,7,0,2*Math.PI);ctx.fillStyle='#333';ctx.fill()}
-function parseMonthData(rows){const managers=[];let totalRow=null;for(let i=3;i<=10&&i<rows.length;i++){const r=rows[i];if(!r||!r[0])continue;const rawName=String(r[0]||'');
+function parseMonthData(rows){const managers=[];let totalRow=null;for(let i=3;i<=11&&i<rows.length;i++){const r=rows[i];if(!r||!r[0])continue;const rawName=String(r[0]||'');
 const hasStar=/[⭐️★🌟]/.test(rawName);
 const name=cleanName(r[0]);
-;if(!name||name==='nan'||name==='NaN'||name==='')continue;if(name==='ОБЩИЙ ПЛАН ОТДЕЛА'||name==='План')break;const plan=parseNum(r[1]);const fact=parseNum(r[2]);const pctExec=parseNum(r[3]);const runRate=parseNum(r[4]);const zayvok=parseNum(r[5]);const perZayvok=parseNum(r[6]);const forecast=parseNum(r[9]);const conv=parseNum(r[10]);if(plan===0&&fact===0)continue;managers.push({name,plan,fact,pctExec,runRate,zayvok,perZayvok,conv,forecast,hasStar})}if(rows.length>15&&rows[15]){totalRow=rows[15]}
+;if(!name||name==='nan'||name==='NaN'||name==='')continue;if(name==='ОБЩИЙ ПЛАН ОТДЕЛА'||name==='План')break;const plan=parseNum(r[1]);const fact=parseNum(r[2]);const pctExec=parseNum(r[3]);const runRate=parseNum(r[4]);const zayvok=parseNum(r[5]);const perZayvok=parseNum(r[6]);const forecast=parseNum(r[9]);const conv=parseNum(r[10]);if(plan===0&&fact===0)continue;managers.push({name,plan,fact,pctExec,runRate,zayvok,perZayvok,conv,forecast,hasStar})}if(rows.length>16&&rows[16]){totalRow=rows[16]}
 // Сортировка по ФАКТУ (марже), не по проценту!
 managers.sort((a,b)=>b.fact-a.fact);
 return{managers,totalRow}}
@@ -198,12 +198,12 @@ function renderTabs(months){const bar=document.getElementById('month-bar');bar.i
 function renderMonth(){
 if(!allData||!currentMonth)return;
 const rows=allData[currentMonth];
-  console.log('Строка 14 (продажи):', rows[13]);
-console.log('Строка 15 (чек):', rows[14]);
-console.log('Строка 16 (маржа):', rows[15]);
-  console.log('Row14:', JSON.stringify(allData[currentMonth][13]));
-console.log('Row15:', JSON.stringify(allData[currentMonth][14]));
+  console.log('Строка 15 (продажи):', rows[14]);
+console.log('Строка 16 (чек):', rows[15]);
+console.log('Строка 17 (маржа):', rows[16]);
+  console.log('Row15:', JSON.stringify(allData[currentMonth][14]));
 console.log('Row16:', JSON.stringify(allData[currentMonth][15]));
+console.log('Row17:', JSON.stringify(allData[currentMonth][16]));
 
 
 if(!rows)return;
@@ -248,8 +248,8 @@ runValEl.className='gauge-value '+getColorClass(runPct);
 // KPI РОПа — чистое чтение значений из таблицы, без вычислений
 
 // 1. Кол-во продаж: строка 14, план в столбце N (13), факт в столбце O (14)
-const ropSalesPlan = parseNum(rows[13][13]);
-const ropSalesFact = parseNum(rows[13][14]);
+const ropSalesPlan = parseNum(rows[14][13]);
+const ropSalesFact = parseNum(rows[14][14]);
 
 const ropSalesEl = document.getElementById('rop-sales');
 ropSalesEl.textContent = ropSalesFact;
@@ -258,8 +258,8 @@ ropSalesEl.classList.add(ropSalesFact >= ropSalesPlan ? 'clr-green' : 'clr-red')
 document.getElementById('rop-sales-plan').textContent = ropSalesPlan;
 
 // 2. Средняя чистая (чек): строка 15, план в N (13), факт в O (14)
-const ropCheckPlan = parseNum(rows[14][13]);
-const ropCheckFact = parseNum(rows[14][14]);
+const ropCheckPlan = parseNum(rows[15][13]);
+const ropCheckFact = parseNum(rows[15][14]);
 
 const ropCheckEl = document.getElementById('rop-check');
 ropCheckEl.textContent = fmtShort(ropCheckFact);
@@ -268,8 +268,8 @@ ropCheckEl.classList.add(ropCheckFact >= ropCheckPlan ? 'clr-green' : 'clr-red')
 document.getElementById('rop-check-plan').textContent = fmtShort(ropCheckPlan);
 
 // 3. Средняя маржинальность: строка 16, план в N (13), факт в O (14)
-const ropMarginPlan = parseNum(rows[15][13]);
-const ropMarginFact = parseNum(rows[15][14]);
+const ropMarginPlan = parseNum(rows[16][13]);
+const ropMarginFact = parseNum(rows[16][14]);
 
 const ropMarginEl = document.getElementById('rop-margin');
 ropMarginEl.textContent = Math.round(ropMarginFact * 100) + '%';
@@ -280,21 +280,21 @@ document.getElementById('rop-margin-plan').textContent = Math.round(ropMarginPla
 
 
 // Активность
-if(rows.length>20){
-  const zayvkiF=rows[18]?parseNum(rows[18][5]):0;
-  const zayvkiP=rows[18]?parseNum(rows[18][1]):0;
+if(rows.length>21){
+  const zayvkiF=rows[18]?parseNum(rows[19][5]):0;
+  const zayvkiP=rows[18]?parseNum(rows[19][1]):0;
   document.getElementById('s-zayvki-f').textContent=fmt(zayvkiF);
   document.getElementById('s-zayvki-f').className='stat-value '+getColorClass(zayvkiP>0?zayvkiF/zayvkiP*100:0);
   document.getElementById('s-zayvki-p').textContent=fmt(zayvkiP);
   
-  const zvonkiF=rows[19]?parseNum(rows[19][5]):0;
-  const zvonkiP=rows[19]?parseNum(rows[19][1]):0;
+  const zvonkiF=rows[19]?parseNum(rows[20][5]):0;
+  const zvonkiP=rows[19]?parseNum(rows[20][1]):0;
   document.getElementById('s-zvonki-f').textContent=fmt(zvonkiF);
   document.getElementById('s-zvonki-f').className='stat-value '+getColorClass(zvonkiP>0?zvonkiF/zvonkiP*100:0);
   document.getElementById('s-zvonki-p').textContent=fmt(zvonkiP);
   
-  const minF=rows[20]?parseNum(rows[20][5]):0;
-  const minP=rows[20]?parseNum(rows[20][1]):0;
+  const minF=rows[20]?parseNum(rows[21][5]):0;
+  const minP=rows[20]?parseNum(rows[21][1]):0;
   document.getElementById('s-min-f').textContent=fmt(minF);
   document.getElementById('s-min-f').className='stat-value '+getColorClass(minP>0?minF/minP*100:0);
   document.getElementById('s-min-p').textContent=fmt(minP);
